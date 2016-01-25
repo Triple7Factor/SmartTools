@@ -91,6 +91,8 @@ else if (currentUrl.search("graph.api.smartthings.com") != -1)
             a.onclick = RemovePings;
             elemDiv.appendChild(a);
             
+            elemDiv.appendChild(document.createElement('br'));
+            
             // Create "Update Local Time" link
             var u = document.createElement('a');
             var linkText = document.createTextNode("Convert To Local Time");
