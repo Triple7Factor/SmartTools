@@ -4,7 +4,7 @@
 // @description 	IDE tools
 // @include     	https://graph.api.smartthings.com/*
 // @include			https://smartthings.zendesk.com/*
-// @version     	1.0
+// @version     	0.1
 // @grant       	none
 // ==/UserScript==
 
@@ -245,10 +245,10 @@ function impersonateUser() {
 
         // Set parameters for impersonation request and call impersonation URL
         var email = $("#wrapper[class$='"+ ticket +"'] > #main_panes > div:visible").find("a.email").html();
-        var params = "j_username=" + email + "&reason=Support Ticket: #" + ticket + "&impersonate=Switch+User";
+        var params = encodeURI("j_username=" + email + "&reason=Support Ticket: " + ticket + "&impersonate=Switch+User");
 
         // Double check before opening impersonation window
-        if (confirm("Do you really want to impersonate " + email + " for \"Support Ticket: #" + ticket + "\"?")) {
+        if (confirm("Do you really want to impersonate " + email + " for \"Support Ticket: " + ticket + "\"?")) {
             var win = window.open("https://graph.api.smartthings.com/login/switchUser?" + params, '_blank');
             win.focus();
         }
