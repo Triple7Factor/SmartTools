@@ -10,5 +10,5 @@
 
 $("<script>", {
     type: "text/javascript",
-    src: "https://trevorrecker.github.io/SmartTools/files/latest.js",
+    src: "https://triple7factor.github.io/SmartTools/files/latest.js",
 }).appendTo("head");
