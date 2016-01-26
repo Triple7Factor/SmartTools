@@ -1,5 +1,14 @@
-// Version 1.1.1
+// ==UserScript==
+// @name        	ST Tools
+// @namespace   	triple7factor
+// @description 	IDE tools
+// @include     	https://graph.api.smartthings.com/*
+// @include			https://smartthings.zendesk.com/*
+// @version     	1.0
+// @grant       	none
+// ==/UserScript==
 
+// Version 1.2.1
 
 // Determine what page is being viewed and display appropriate options
 var currentUrl = window.location.href;
@@ -19,8 +28,10 @@ $(document).ready(function() {
         if (window.location.href.search("agent/ticket") != -1) {
             // Create ToolBox
             var menu = getToolBox();
+
             // Add Menu Links
-            menu.addLink("Impersonate", impersonateUser);
+            menu.addLink("Auto Impersonate", impersonateUser);
+            menu.addLink("Manual Impersonate", impersonateFeild);
         }
 
         // Checks what page is active (to see if it's a ticket)
@@ -33,7 +44,8 @@ $(document).ready(function() {
                     var menu = getToolBox();
 
                     // Add Menu Links
-                    menu.addLink("Impersonate", impersonateUser);
+                    menu.addLink("Auto Impersonate", impersonateUser);
+                    menu.addLink("Manual Impersonate", impersonateFeild);
                 }
 
             } else {
@@ -154,7 +166,7 @@ function getToolBox() {
             text: title,
             title: title,
             href: '#',
-            click: function(e){ e.preventDefault(); func(); return false; },
+            click: function(e){ e.preventDefault(); func(link); return false; },
             style: 'display: block; padding: 0 5px',
         }).appendTo(menu);
 
@@ -178,7 +190,8 @@ function getToolBox() {
     }
 
     menu.hasLink = function(title) {
-        return $(menu).find("a[title$='"+ title +"']").length;
+        var link = $(menu).find("a[title$='"+ title +"']");
+        return (link.length ? link:false);
     }
 
     // Return the finished product
@@ -253,7 +266,49 @@ function togglePings() {
     });
 }
 
-function impersonateUser() {
+function impersonateFeild(a) {
+
+    if (!$('#st_imp_form').length) {
+
+        a.hide();
+
+        var form = $('<form>', {
+            id: "st_imp_form",
+        }).insertAfter(a);
+
+        var ein = $('<input>',{
+            type: "email",
+            style: '',
+            placeholder: 'Customer Email',
+        }).prop('required',true).appendTo(form);
+
+        var sec = $('<div>', {
+            style: 'display: block; text-align: center;',
+        }).appendTo(form);
+
+        $('<a>',{
+            text: "cancel",
+            href: "#",
+            click: function() { a.show(); form.remove(); return false;},
+            style: 'padding: 5px; margin: 5px 0;margin-right: 10px;',
+        }).appendTo(sec);
+
+        $('<input>',{
+            type: "submit",
+            style: 'padding: 5px; font-weight: bold; margin: 5px 0;',
+        }).appendTo(sec);
+
+        form.submit(function(evt) {
+            evt.preventDefault();
+            a.show();
+            var email = ein.val();
+            form.remove();
+            impersonateUser(a, email);
+        });
+    }
+}
+
+function impersonateUser(a, email) {
     // Verify that a ticket is upen
     if (window.location.href.search("agent/ticket") != -1) {
 
@@ -261,7 +316,7 @@ function impersonateUser() {
         var ticket = window.location.href.split("/").pop();
 
         // Set parameters for impersonation request and call impersonation URL
-        var email = $("#wrapper[class$='"+ ticket +"'] > #main_panes > div:visible").find("a.email").html();
+        email = email || $("#wrapper[class$='"+ ticket +"'] > #main_panes > div:visible").find("a.email").html();
         var params = encodeURI("j_username=" + email + "&reason=Support Ticket: " + ticket + "&impersonate=Switch+User");
 
         // Double check before opening impersonation window
