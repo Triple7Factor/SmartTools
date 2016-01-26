@@ -6,6 +6,7 @@
 // @include			https://smartthings.zendesk.com/*
 // @version     	1.1
 // @grant       	none
+// @downloadURL     https://trevorrecker.github.io/SmartTools/smarttools.js
 // ==/UserScript==
 
 
