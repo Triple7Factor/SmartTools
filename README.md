@@ -12,5 +12,6 @@ SmartThings IDE tools and shortcuts for Support Engineers
 - Completely new look
 - Added the ability to minimize the overlay
 - General Optimizations
+
 ### Version 1.1
 - Hover over SmartTool tab to expand the menu
