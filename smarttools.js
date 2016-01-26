@@ -4,7 +4,7 @@
 // @description 	IDE tools
 // @include     	https://graph.api.smartthings.com/*
 // @include			https://smartthings.zendesk.com/*
-// @version     	1.0
+// @version     	1.1
 // @grant       	none
 // ==/UserScript==
 
@@ -23,6 +23,7 @@ $(document).ready(function() {
 
     // Ticket Page
     if (currentUrl.search("zendesk") != -1) {
+
         if (window.location.href.search("agent/ticket") != -1) {
             // Create ToolBox
             var menu = getToolBox();
@@ -131,26 +132,21 @@ function getToolBox() {
     var tab = $('<div>', {
         id: 'tab',
         text: 'ST',
-        style: 'cursor: pointer; margin: 0; line-height: 14px; font-size: 18px; font-weight: bold; padding: 12px 7px; padding-right:10px; position: absolute; display: inline-block; right: 100%; margin-right: 9px; margin-top: -11px; background: #e3e3e3; border-radius: 7px 0 0 7px; border: solid 1px rgba(0,0,0,0.2); border-right: none;',
+        style: 'margin: 0; line-height: 14px; font-size: 18px; font-weight: bold; padding: 12px 7px; padding-right:10px; position: absolute; display: inline-block; right: 100%; margin-right: 9px; margin-top: -11px; background: #e3e3e3; border-radius: 7px 0 0 7px; border: solid 1px rgba(0,0,0,0.2); border-right: none;',
     }).appendTo(header);
 
     // Default the tab to closed
     menu.collapsed = true;
     menu.css({"right": -menu.outerWidth()-1});
 
-    // Add an event for when the tab is clicked
-    tab.click(function() {
-
-        if (menu.collapsed) {
-            // Animage the tab open if it's collapsed
-            menu.animate({"right":0});
-            menu.collapsed = false;
-
-        } else {
-            // Animate the tab closed if it's open
-            menu.animate({"right": -menu.outerWidth()-1});
-            menu.collapsed = true;
-        }
+    menu.hover(function() {
+        // Animate the tab open when mouse enters
+        menu.stop().animate({"right":0}, "fast");
+        menu.collapsed = false;
+    }, function() {
+        // Animate the tab closed when the mouse leaves
+        menu.stop().animate({"right": -menu.outerWidth()-1}, "fast");
+        menu.collapsed = true;
     });
 
     // Create the header title text
@@ -278,6 +274,7 @@ function impersonateUser() {
 
         // Double check before opening impersonation window
         if (confirm("Do you really want to impersonate " + email + " for \"Support Ticket: " + ticket + "\"?")) {
+
             var win = window.open("https://graph.api.smartthings.com/login/switchUser?" + params, '_blank');
             win.focus();
         }
