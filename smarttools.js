@@ -4,7 +4,7 @@
 // @description 	IDE tools
 // @include     	https://graph.api.smartthings.com/*
 // @include			https://smartthings.zendesk.com/*
-// @version     	0.1
+// @version     	1.0
 // @grant       	none
 // ==/UserScript==
 
