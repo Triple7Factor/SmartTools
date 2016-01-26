@@ -73,6 +73,19 @@ $(document).ready(function() {
             // Add time conversion link
             menu.addLink("Convert To Local Time", convertTime);
 
+            // Checks for updates
+            setInterval(function() {
+
+                if (hasPings()) {
+                    if (!menu.hasLink("Toggle Ping Events")) {
+                        menu.addLink("Toggle Ping Events", togglePings);
+                    }
+                } else {
+                    menu.removeLink("Toggle Ping Events");
+                }
+
+            }, 5000);
+
             // Check if the event page has any ping events
             if (hasPings()) {
 
@@ -157,12 +170,28 @@ function getToolBox() {
             style: 'display: block; padding: 0 5px',
         }).appendTo(menu);
 
-        menu.css({"right": -menu.outerWidth()-1});
+        if (menu.collapsed) {
+            menu.css({"right": -menu.outerWidth()-1});
+        }
 
         if (!menu.is(":visible")) {
             menu.delay(100).fadeIn(500);
         }
+
     };
+
+    menu.removeLink = function(title) {
+
+        var elem = $(menu).find("a[title$='"+ title +"']");
+        if (elem.length) {
+            elem.remove();
+        }
+
+    }
+
+    menu.hasLink = function(title) {
+        return $(menu).find("a[title$='"+ title +"']").length;
+    }
 
     // Return the finished product
     return menu;
