@@ -1,4 +1,4 @@
-// Version 1.2.1
+// Version 1.2.2
 
 // Determine what page is being viewed and display appropriate options
 var currentUrl = window.location.href;
@@ -218,28 +218,63 @@ function convertTime() {
     });
 }
 
+var updatesRunning = false;
+
 // Loop through all links and activate each "Update" link
 function updateApps() {
+    if(!updatesRunning) {
+        updatesRunning = true;
 
-    // Loop through each link
-    $("a.executeUpdate").each(function() {
+        $("a.executeUpdate span").remove();
 
-        // Call Update URL and display results
-        var result = GetHTTP($(this).attr("href"));
-        if(result.search("OK") == -1) {
-            // Failed
-            $(this).append(" <font color=red><b>Error</b></font>");
-            console.log(result);
-            flashErrorMessage("Error updating one or more SmartApps!");
+        var links = [];
+        var anyFailed = false;
+        var i = 0;
 
-        } else {
-            // Succeeded
-            $(this).append(" <font color=green><b>" + result + "</b></font>");
-        }
-    });
+        // Loop through each link
+        $("a.executeUpdate").each(function() {
 
-    // Display confirmation
-    flashMessage("SmartApps updated successfully!");
+            links.push({
+                url: $(this).attr("href"),
+                context: this,
+                async: true,
+                complete: function(data) {
+
+                    if(data.responseText.search("OK") == -1) {
+                        // Failed
+                        $(this).append(" <span><font color=red><b>Error</b></font></span>");
+                        console.log(data);
+                        anyFailed = true;
+
+                    } else {
+                        // Succeeded
+                        $(this).append(" <span><font color=green><b>" + data.responseText + "</b></font></span>");
+                    }
+
+                    if (i < links.length) {
+                        $.ajax(links[i++]);
+                    } else {
+                        if (!anyFailed) {
+                            flashMessage("SmartApps updated successfully!");
+                        } else {
+                            flashErrorMessage("Error updating one or more SmartApps!");
+                        }
+                        updatesRunning = false;
+                    }
+
+                }
+            });
+
+        });
+
+        if (links.length)
+            $.ajax(links[i++]);
+    }
+}
+
+function processUpdateData(elem, data) {
+    console.log(elem);
+    console.log(data);
 }
 
 // Check if a ping event exists
@@ -342,7 +377,7 @@ function GetHTTP(url) {
 
     // Call URL and get results
     xmlHttp = new XMLHttpRequest();
-    xmlHttp.open( "GET", url, false );
+    xmlHttp.open( "GET", url, true );
     xmlHttp.send(null);
 
     // Return results
