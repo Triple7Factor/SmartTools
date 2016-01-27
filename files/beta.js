@@ -228,53 +228,58 @@ function convertTime() {
     });
 }
 
+var updatesRunning = false;
+
 // Loop through all links and activate each "Update" link
 function updateApps() {
+    if(!updatesRunning) {
+        updatesRunning = true;
 
-    $("a.executeUpdate span").remove();
+        $("a.executeUpdate span").remove();
 
-    var links = [];
-    var anyFailed = false;
-    var i = 0;
+        var links = [];
+        var anyFailed = false;
+        var i = 0;
 
-    // Loop through each link
-    $("a.executeUpdate").each(function() {
+        // Loop through each link
+        $("a.executeUpdate").each(function() {
 
-        links.push({
-            url: $(this).attr("href"),
-            context: this,
-            async: true,
-            complete: function(data) {
+            links.push({
+                url: $(this).attr("href"),
+                context: this,
+                async: true,
+                complete: function(data) {
 
-                if(data.responseText.search("OK") == -1) {
-                    // Failed
-                    $(this).append(" <span><font color=red><b>Error</b></font></span>");
-                    console.log(data);
-                    anyFailed = true;
+                    if(data.responseText.search("OK") == -1) {
+                        // Failed
+                        $(this).append(" <span><font color=red><b>Error</b></font></span>");
+                        console.log(data);
+                        anyFailed = true;
 
-                } else {
-                    // Succeeded
-                    $(this).append(" <span><font color=green><b>" + data.responseText + "</b></font></span>");
-                }
-
-                if (i < links.length) {
-                    $.ajax(links[i++]);
-                } else {
-                    if (!anyFailed) {
-                        flashMessage("SmartApps updated successfully!");
                     } else {
-                        flashErrorMessage("Error updating one or more SmartApps!");
+                        // Succeeded
+                        $(this).append(" <span><font color=green><b>" + data.responseText + "</b></font></span>");
                     }
-                }
 
-            }
+                    if (i < links.length) {
+                        $.ajax(links[i++]);
+                    } else {
+                        if (!anyFailed) {
+                            flashMessage("SmartApps updated successfully!");
+                        } else {
+                            flashErrorMessage("Error updating one or more SmartApps!");
+                        }
+                        updatesRunning = false;
+                    }
+
+                }
+            });
+
         });
 
-    });
-
-    if (links.length)
-        $.ajax(links[i++]);
-
+        if (links.length)
+            $.ajax(links[i++]);
+    }
 }
 
 function processUpdateData(elem, data) {
