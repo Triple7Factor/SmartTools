@@ -78,6 +78,40 @@ $(document).ready(function() {
             // Add time conversion link
             menu.addLink("Convert To Local Time", convertTime);
 
+            function updateOptions() {
+
+                if ($("#batchSizeSelect").length) {
+
+                    var select = $("#batchSizeSelect");
+
+                    select.on("change", function(){
+    					var newBatchSize = $(this).val();
+    					$.cookie('events-batch-size', newBatchSize, { path: '/' });
+    					$('#max').val(newBatchSize);
+                        loadEvents();
+                        updateOptions();
+    				});
+
+                    $("option.st_custom").remove();
+
+                    $("<option>", {
+                        text: "500",
+                        value: "500",
+                        class: "st_custom"
+                    }).appendTo(select);
+
+                    $("<option>", {
+                        text: "1000 (slow!)",
+                        value: "1000",
+                        class: "st_custom"
+                    }).appendTo(select);
+
+                    var batchVal = $.cookie('events-batch-size');
+
+                    $("#batchSizeSelect option[value='"+ batchVal +"']").prop('selected', true);
+                }
+            }
+
             // Checks for updates
             setInterval(function() {
 
@@ -98,19 +132,38 @@ $(document).ready(function() {
                 menu.addLink("Toggle Ping Events", togglePings);
             }
 
-            if (currentUrl.search("hub/") != -1) {
+            updateOptions();
 
-                // Increase number of events possible and force refresh on option change
-                var select = document.getElementById('batchSizeSelect');
-                select.options[select.options.length] = new Option('500', '500');
-                select.options[select.options.length] = new Option('1000 (slow!)', '1000');
-                select.addEventListener('change',function(){
-                    select.dispatchEvent(new Event('change'));
-                    loadEvents(action);
-                });
+            if (typeof loadEvents == 'function') {
+                loadEvents = function(action) {
+    				$.ajax({
+    					url: "/event/listAclEvents",
+    					data: {
+    						all: $('#all').val(),
+    						source: $('#source').val(),
+    						max: enablePolling ? 0 : $('#max').val(),
+    						id: $('#id').val(),
+    						type: $('#type').val(),
+    						sinceDate: $('#sinceDate:visible').val(),
+    						beforeDate: $('#beforeDate:visible').val(),
+    						eventType: $('#eventType').val(),
+    						nameFilter: $('#nameFilter:visible').val()
+    					},
+    					beforeSend: function(xhr) {
+    						$('#fetchingEventsSpinner').css('display', 'inline-block');
+    					},
+    					success: function(data) {
+    						$('#fetchingEventsSpinner').hide();
+    						$('.list-acl').html(data);
+                            updateOptions();
+    					}
+    				});
+    			}
             }
+
         }
     }
+
 });
 
 // Create the ToolBox
@@ -292,11 +345,18 @@ function hasPings() {
     return ($("table").text().indexOf("ping") != -1);
 }
 
+var showPings = true;
+
 // Loop through all event entries and remove each "Ping" entry
 function togglePings() {
+    showPings = !showPings;
     $("tr").each(function() {
         if ($(this).text().indexOf("ping") != -1) {
-            $(this).toggle();
+            if (showPings) {
+                $(this).show();
+            } else {
+                $(this).hide();
+            }
         }
     });
 }
