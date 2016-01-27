@@ -1,7 +1,10 @@
-// Version 1.2.2
+// Version 1.2.3
 
 // Determine what page is being viewed and display appropriate options
 var currentUrl = window.location.href;
+
+var showPings = true;
+var timeConverted = false;
 
 // Adds lightweight time script for formatting
 $('<script>',{
@@ -48,7 +51,7 @@ $(document).ready(function() {
         // Check every 5 seconds
         },5000);
 
-    } else if (currentUrl.search("graph.api.smartthings.com") != -1) {
+    } else if (currentUrl.search("api.smartthings.com") != -1) {
         // IDE
 
         // IDE Pages
@@ -99,6 +102,16 @@ $(document).ready(function() {
                     var batchVal = $.cookie('events-batch-size');
 
                     $("#batchSizeSelect option[value='"+ batchVal +"']").prop('selected', true);
+
+                }
+
+                if (!showPings) {
+                    showPings = true;
+                    togglePings();
+                }
+
+                if(timeConverted) {
+                    convertTime();
                 }
             }
 
@@ -151,6 +164,43 @@ $(document).ready(function() {
     			}
             }
 
+            $(window).unbind("scroll");
+            $(window).scroll(function() {
+                if(enablePolling === false && $(window).scrollTop() >= $(document).height() - $(window).height()) {
+                    if (loadingMoreEvents !== true && ($('#lastEvaluatedHashKey').val() !== "" && $('#lastEvaluatedRangeKey').val() !== ""
+                            || $('#startAfter').val() !== "")) {
+                        loadingMoreEvents = true
+                        $.ajax({
+                            url: "/event/listMoreEvents",
+                            data: {
+                                all: $('#all').val(),
+                                source: $('#source').val(),
+                                max: $('#max').val(),
+                                id: $('#id').val(),
+                                type: $('#type').val(),
+                                sinceDate: $('#sinceDate:visible').val(),
+                                beforeDate: $('#beforeDate:visible').val(),
+                                eventType: $('#eventType').val(),
+                                lastEvaluatedHashKey: $('#lastEvaluatedHashKey').val(),
+                                lastEvaluatedRangeKey: $('#lastEvaluatedRangeKey').val(),
+                                startAfter: $('#startAfter').val()
+                            },
+                            beforeSend: function(xhr) {
+                                $('#loadingMoreSpinner').css('display', 'table');
+                            },
+                            success: function(data) {
+                                $('#loadingMoreSpinner').hide();
+                                $('#lastEvaluatedHashKey').val(data.lastEvaluatedHashKey);
+                                $('#lastEvaluatedRangeKey').val(data.lastEvaluatedRangeKey);
+                                $('#startAfter').val(data.startAfter);
+                                $('.events-table').append(data.renderedEvents);
+                                loadingMoreEvents = false;
+                                updateOptions();
+                            }
+                        });
+                    }
+                }
+            });
         }
     }
 
@@ -166,13 +216,13 @@ function getToolBox() {
 
     // Create ToolBox Container
     var menu = $("<div>",{
-        style: 'display: none;position:fixed;top:150px;right:0px;padding:10px; padding-right:40px;z-index:200;background:#e3e3e3;border: solid 1px rgba(0,0,0,0.2); border-right: none;-webkit-border-radius: 0 0 0 7px; border-radius: 0 0 0 7px;',
+        style: 'font-family: arial !important;display: none;position:fixed;top:150px;right:0px;padding:10px; padding-right:40px;z-index:200;background:#e3e3e3;border: solid 1px rgba(0,0,0,0.2); border-right: none;-webkit-border-radius: 0 0 0 7px; border-radius: 0 0 0 7px;',
         id: "smarttools-menu",
     }).appendTo("body");
 
     // Create the Header bar
     var header = $('<div>', {
-        style: 'width: 100%; position: relative; display: block; position: relative; padding-left:5px;',
+        style: 'width: 100%; font-family: arial; position: relative; display: block; position: relative; padding-left:5px;',
     }).appendTo(menu);
 
     // Create the minimize tab
@@ -199,7 +249,7 @@ function getToolBox() {
     // Create the header title text
     var title = $('<h3>', {
         text:"SmartTools",
-        style: 'display: inline-block; width: 100%; padding: 0; padding-bottom: 3px; margin: 0 auto; border-bottom: 1px solid #BBB; margin-bottom: 7px;',
+        style: 'font-family: inherit; font-size: 24px; font-weight: 500; display: inline-block; width: 100%; padding: 0; padding-bottom: 3px; margin: 0 auto; border-bottom: 1px solid #BBB; margin-bottom: 7px;',
     }).appendTo(header);
 
     // Add links to the ToolBox that run functions
@@ -210,7 +260,7 @@ function getToolBox() {
             title: title,
             href: '#',
             click: function(e){ e.preventDefault(); func(link); return false; },
-            style: 'display: block; padding: 0 5px',
+            style: 'display: block; padding: 0 5px; font-family: inherit; font-size: 12px;',
         }).appendTo(menu);
 
         if (menu.collapsed) {
@@ -218,7 +268,7 @@ function getToolBox() {
         }
 
         if (!menu.is(":visible")) {
-            menu.delay(100).fadeIn(500);
+            menu.show();
         }
 
     };
@@ -243,6 +293,8 @@ function getToolBox() {
 
 // Convert the time to readable timezone
 function convertTime() {
+
+    timeConverted = true;
     // Loop though the different dates in the table
     $("table td .eventDate").each(function() {
         // Make sure it's not already been converted
@@ -334,8 +386,6 @@ function processUpdateData(elem, data) {
 function hasPings() {
     return ($("table").text().indexOf("ping") != -1);
 }
-
-var showPings = true;
 
 // Loop through all event entries and remove each "Ping" entry
 function togglePings() {
