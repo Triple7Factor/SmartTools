@@ -216,7 +216,7 @@ function getToolBox() {
 
     // Create ToolBox Container
     var menu = $("<div>",{
-        style: 'font-family: arial !important;display: none;position:fixed;top:150px;right:0px;padding:10px; padding-right:40px;z-index:200;background:#e3e3e3;border: solid 1px rgba(0,0,0,0.2); border-right: none;-webkit-border-radius: 0 0 0 7px; border-radius: 0 0 0 7px;',
+        style: 'color: #666; font-family: arial !important;display: none;position:fixed;top:150px;right:0px;padding:10px; padding-right:40px;z-index:200;background:#e3e3e3;border: solid 1px rgba(0,0,0,0.2); border-right: none;-webkit-border-radius: 0 0 0 7px; border-radius: 0 0 0 7px;',
         id: "smarttools-menu",
     }).appendTo("body");
 
@@ -229,7 +229,7 @@ function getToolBox() {
     var tab = $('<div>', {
         id: 'tab',
         text: 'ST',
-        style: 'margin: 0; line-height: 14px; font-size: 18px; font-weight: bold; padding: 12px 7px; padding-right:10px; position: absolute; display: inline-block; right: 100%; margin-right: 9px; margin-top: -11px; background: #e3e3e3; border-radius: 7px 0 0 7px; border: solid 1px rgba(0,0,0,0.2); border-right: none;',
+        style: 'color: #666; margin: 0; line-height: 14px; font-size: 18px; font-weight: bold; padding: 12px 7px; padding-right:10px; position: absolute; display: inline-block; right: 100%; margin-right: 9px; margin-top: -11px; background: #e3e3e3; border-radius: 7px 0 0 7px; border: solid 1px rgba(0,0,0,0.2); border-right: none;',
     }).appendTo(header);
 
     // Default the tab to closed
@@ -249,7 +249,7 @@ function getToolBox() {
     // Create the header title text
     var title = $('<h3>', {
         text:"SmartTools",
-        style: 'font-family: inherit; font-size: 24px; font-weight: 500; display: inline-block; width: 100%; padding: 0; padding-bottom: 3px; margin: 0 auto; border-bottom: 1px solid #BBB; margin-bottom: 7px;',
+        style: 'text-decoration: none; color: #666; font-family: inherit; font-size: 24px; font-weight: 500; display: inline-block; width: 100%; padding: 0; padding-bottom: 3px; margin: 0 auto; border-bottom: 1px solid #BBB; margin-bottom: 7px;',
     }).appendTo(header);
 
     // Add links to the ToolBox that run functions
@@ -260,8 +260,14 @@ function getToolBox() {
             title: title,
             href: '#',
             click: function(e){ e.preventDefault(); func(link); return false; },
-            style: 'display: block; padding: 0 5px; font-family: inherit; font-size: 12px;',
+            style: 'font-size: 14px; text-decoration: none; color: #2196F3; font-family: helvetica; display: block; padding: 2px 5px;',
         }).appendTo(menu);
+
+        link.hover(function() {
+            $(this).css("text-decoration", "underline");
+        }, function() {
+            $(this).css("text-decoration", "none");
+        });
 
         if (menu.collapsed) {
             menu.css({"right": -menu.outerWidth()-1});
@@ -409,28 +415,29 @@ function impersonateFeild(a) {
 
         var form = $('<form>', {
             id: "st_imp_form",
+            style: 'padding: 10px; background-color: #EEE; margin-top: 5px;',
         }).insertAfter(a);
 
         var ein = $('<input>',{
             type: "email",
-            style: '',
+            style: 'margin: 0;',
             placeholder: 'Customer Email',
         }).prop('required',true).appendTo(form);
 
         var sec = $('<div>', {
-            style: 'display: block; text-align: center;',
+            style: 'display: table; text-align: center; margin: 0 auto; margin-top: 5px;',
         }).appendTo(form);
 
         $('<a>',{
             text: "cancel",
             href: "#",
             click: function() { a.show(); form.remove(); return false;},
-            style: 'padding: 5px; margin: 5px 0;margin-right: 10px;',
+            style: 'font-family: helvetica; display: table-cell; verticle-align: center; padding: 5px; margin: 0; margin-right: 10px;',
         }).appendTo(sec);
 
         $('<input>',{
             type: "submit",
-            style: 'padding: 5px; font-weight: bold; margin: 5px 0;',
+            style: 'font-family: helvetica; display: table-cell; verticle-align: center; padding: 5px; font-weight: bold; margin: 0;',
         }).appendTo(sec);
 
         form.submit(function(evt) {
@@ -452,7 +459,8 @@ function impersonateUser(a, email) {
 
         // Set parameters for impersonation request and call impersonation URL
         email = email || $("#wrapper[class$='"+ ticket +"'] > #main_panes > div:visible").find("a.email").html();
-        var params = encodeURI("j_username=" + email + "&reason=Support Ticket: " + ticket + "&impersonate=Switch+User");
+        email_encode = encodeURIComponent(email);
+        var params = "j_username=" + email_encode + "&reason=Support Ticket: " + ticket + "&impersonate=Switch+User";
 
         // Double check before opening impersonation window
         if (confirm("Do you really want to impersonate " + email + " for \"Support Ticket: " + ticket + "\"?")) {
