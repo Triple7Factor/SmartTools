@@ -16,6 +16,9 @@ var currentUrl = window.location.href;
 var showPings = true;
 var timeConverted = false;
 
+// Keep window open during certain functions
+var keepOpen = false;
+
 // Adds lightweight time script for formatting
 $('<script>',{
     src: "https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.11.1/moment.min.js",
@@ -251,9 +254,11 @@ function getToolBox() {
         menu.stop().animate({"right":0}, "fast");
         menu.collapsed = false;
     }, function() {
-        // Animate the tab closed when the mouse leaves
-        menu.stop().animate({"right": -menu.outerWidth()-1}, "fast");
-        menu.collapsed = true;
+        // Animate the tab closed when the mouse leaves *except* when editing manual impersonation text
+        if (!keepOpen) {
+			menu.stop().animate({"right": -menu.outerWidth()-1}, "fast");
+			menu.collapsed = true;
+		}
     });
 
     // Create the header title text
@@ -419,6 +424,8 @@ function togglePings() {
 
 function impersonateFeild(a) {
 
+    // Keep window open while impersonation field is visible
+    keepOpen=true;
     if (!$('#st_imp_form').length) {
 
         a.hide();
@@ -441,7 +448,7 @@ function impersonateFeild(a) {
         $('<a>',{
             text: "cancel",
             href: "#",
-            click: function() { a.show(); form.remove(); return false;},
+            click: function() {keepOpen=false; a.show(); form.remove(); return false;},
             style: 'font-family: helvetica; display: table-cell; verticle-align: center; padding: 5px; margin: 0; margin-right: 10px;',
         }).appendTo(sec);
 
