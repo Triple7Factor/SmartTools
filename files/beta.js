@@ -813,6 +813,8 @@ function togglePings() {
 
 function impersonateFeild(a) {
 
+    // Keep window open while impersonation field is visible
+    keepOpen=true;
     if (!$('#st_imp_form').length) {
 
         keepOpen = true;
